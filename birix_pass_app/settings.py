@@ -61,8 +61,8 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-SESSION_COOKIE_SAMESITE = None
-CSRF_COOKIE_SAMESITE    = None
+SESSION_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE    = 'None'
 
 # При этом сетевые кукy должны быть Secure, иначе некоторые браузеры их откажутся ставить
 SESSION_COOKIE_SECURE = True
