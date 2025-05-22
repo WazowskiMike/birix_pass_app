@@ -1,10 +1,10 @@
 {% extends 'web/base.html' %}
 {% block content %}
 <div class="col-md-6 offset-md-3">
-  <h2>Удалить запись: {{ entry.title }}</h2>
+  <h2>Delete Password: {{ entry.title }}</h2>
   <form method="post">{% csrf_token %}
-    <button type="submit" class="btn btn-danger">Подтвердить удаление</button>
-    <a href="{% url 'entry_list' %}" class="btn btn-secondary">Отмена</a>
+    <button type="submit" class="btn btn-danger">Confirm Deletion</button>
+    <a href="{% url 'entry_list' %}" class="btn btn-secondary">Cancel</a>
   </form>
 </div>
 {% endblock %}

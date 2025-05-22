@@ -8,15 +8,13 @@
 />
 <style>
   .collapse,
-    .collapsing {
-      transition: none !important;
+  .collapsing {
+    transition: none !important;
   }
-
   span[data-value],
   .toggle-visibility {
     cursor: pointer;
   }
-  /* Стили для тултипа */
   .copy-tooltip {
     position: absolute;
     top: 100%;
@@ -37,36 +35,46 @@
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="mb-0">
       {% if selected_category %}
-        Пароли категории «{{ selected_category.name }}»
+        Passwords in “{{ selected_category.name }}”
       {% else %}
-        Все пароли
+        All Passwords
       {% endif %}
     </h1>
     <a
       href="{% url 'entry_add' %}{% if selected_category %}?category={{ selected_category.id }}{% endif %}"
       class="btn btn-success"
     >
-      + Добавить пароль
+      + Add Password
     </a>
   </div>
 
   {% if entries %}
-    <table class="table table-striped align-middle position-relative">
+    <!-- Search field -->
+    <div class="mb-3">
+      <input
+        type="text"
+        id="searchInput"
+        class="form-control"
+        placeholder="Search by title..."
+      >
+    </div>
+
+    <table class="table table-striped align-middle position-relative" id="passwordTable">
       <thead>
         <tr>
-          <th>Название</th>
-          <th>Логин</th>
-          <th>Пароль</th>
-          <th>Описание</th>
-          <th>Действия</th>
+          <th>Name</th>
+          <th>Username</th>
+          <th>Password</th>
+          <th>Description</th>
+          <th>Link</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-      {% for e in entries %}
+        {% for e in entries %}
         <tr>
-          <td>{{ e.title }}</td>
-
-          <!-- ЛОГИН -->
+          <td class="title-cell">{{ e.title }}</td>
+          <!-- USERNAME -->
           <td>
             <div class="position-relative d-inline-block">
               <span
@@ -77,12 +85,11 @@
               <i
                 class="bi bi-eye-fill toggle-visibility"
                 data-target="loginText{{ e.id }}"
-                title="Показать/скрыть"
+                title="Show/Hide"
               ></i>
             </div>
           </td>
-
-          <!-- ПАРОЛЬ -->
+          <!-- PASSWORD -->
           <td>
             <div class="position-relative d-inline-block">
               <span
@@ -93,12 +100,11 @@
               <i
                 class="bi bi-eye-fill toggle-visibility"
                 data-target="passText{{ e.id }}"
-                title="Показать/скрыть"
+                title="Show/Hide"
               ></i>
             </div>
           </td>
-
-          <!-- ОПИСАНИЕ -->
+          <!-- DESCRIPTION -->
           <td class="position-relative" style="white-space: nowrap;">
             <button
               class="btn btn-sm btn-info"
@@ -108,7 +114,7 @@
               aria-expanded="false"
               aria-controls="notesBlock{{ e.id }}"
             >
-              Описание
+              Description
             </button>
             <div
               class="collapse position-absolute bg-white border rounded pt-4 pb-2 px-2 text-break"
@@ -127,30 +133,39 @@
               <button
                 type="button"
                 class="btn-close position-absolute top-0 end-0 m-2"
-                aria-label="Закрыть"
+                aria-label="Close"
                 data-bs-toggle="collapse"
                 data-bs-target="#notesBlock{{ e.id }}"
               ></button>
-
               {{ e.notes|linebreaksbr }}
             </div>
           </td>
-
-          <!-- ДЕЙСТВИЯ -->
           <td>
-            <a href="{% url 'entry_edit' e.pk %}" class="btn btn-sm btn-outline-secondary">Редактировать</a>
-            <a href="{% url 'entry_delete' e.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+            {% if e.url %}
+            <a
+              href="{{ e.url }}"
+              target="_blank"
+              class="btn btn-sm btn-outline-primary"
+              title="Go to link"
+            >
+              🔗
+            </a>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'entry_edit' e.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+            <a href="{% url 'entry_delete' e.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
           </td>
         </tr>
-      {% endfor %}
+        {% endfor %}
       </tbody>
     </table>
   {% else %}
     <div class="alert alert-info">
       {% if selected_category %}
-        В этой категории ещё нет паролей.
+        There are no passwords in this category yet.
       {% else %}
-        Пароли отсутствуют.
+        No passwords available.
       {% endif %}
     </div>
   {% endif %}
@@ -160,6 +175,15 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('searchInput');
+  const table = document.getElementById('passwordTable');
+  searchInput.addEventListener('input', () => {
+    const filter = searchInput.value.trim().toLowerCase();
+    table.querySelectorAll('tbody tr').forEach(row => {
+      const title = row.querySelector('.title-cell').textContent.toLowerCase();
+      row.style.display = title.includes(filter) ? '' : 'none';
+    });
+  });
   // Toggle visibility
   document.querySelectorAll('.toggle-visibility').forEach(icon => {
     icon.addEventListener('click', () => {
@@ -182,15 +206,14 @@ document.addEventListener('DOMContentLoaded', () => {
     span.addEventListener('click', () => {
       const value = span.dataset.value;
       navigator.clipboard.writeText(value).then(() => {
-        // Покажем тултип
+        // Show tooltip
         const container = span.parentElement;
-        // Удалим старый, если есть
         const old = container.querySelector('.copy-tooltip');
         if (old) old.remove();
 
         const tip = document.createElement('div');
         tip.className = 'copy-tooltip';
-        tip.textContent = 'Скопировано';
+        tip.textContent = 'Copied';
         container.appendChild(tip);
 
         setTimeout(() => {

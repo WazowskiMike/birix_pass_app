@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>{% block title %}BitrixPassApp{% endblock %}</title>
@@ -16,12 +16,12 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarMain">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="{% url 'category_list' %}">Категории</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'entry_list' %}">Все пароли</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'category_list' %}">Categories</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'entry_list' %}">All Passwords</a></li>
         </ul>
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="{% url 'change_password' %}">Настройки</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Выход</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'change_password' %}">Settings</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Logout</a></li>
         </ul>
       </div>
     </div>
@@ -34,14 +34,14 @@
       </main>
       <aside class="col-md-3">
         <div class="card mb-4">
-          <div class="card-header">Категории</div>
+          <div class="card-header">Categories</div>
           <ul class="list-group list-group-flush">
             {% for cat in categories %}
               <li class="list-group-item">
                 <a href="{% url 'entry_list' %}?category={{ cat.id }}">{{ cat.name }}</a>
               </li>
             {% empty %}
-              <li class="list-group-item text-muted">Нет категорий</li>
+              <li class="list-group-item text-muted">No categories</li>
             {% endfor %}
           </ul>
         </div>

@@ -4,28 +4,28 @@
 {% block content %}
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0">Категории</h2>
+    <h2 class="mb-0">Categories</h2>
     <a href="{% url 'category_add' %}" class="btn btn-success">
-      + Добавить категорию
+      + Add Category
     </a>
   </div>
 
   <div class="card">
     <div class="card-header">
-      Список категорий
+      Category List
     </div>
     <ul class="list-group list-group-flush">
       {% for c in categories %}
       <li class="list-group-item d-flex justify-content-between align-items-center">
         <span>{{ c.name }}</span>
         <div>
-          <a href="{% url 'category_edit' c.pk %}" class="btn btn-sm btn-outline-secondary me-1">Редактировать</a>
-          <a href="{% url 'category_delete' c.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+          <a href="{% url 'category_edit' c.pk %}" class="btn btn-sm btn-outline-secondary me-1">Edit</a>
+          <a href="{% url 'category_delete' c.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
         </div>
       </li>
       {% empty %}
       <li class="list-group-item text-muted">
-        Нет категорий
+        No categories
       </li>
       {% endfor %}
     </ul>
