@@ -41,7 +41,7 @@ def login_view(request):
             # Делаем настоящий HTTP-redirect, который iframe подхватит
             return redirect(next_url)
         else:
-            messages.error(request, 'Неверный мастер-пароль.')
+            messages.error(request, 'Wrong master-password.')
 
     # При GET или невалидном POST — рендерим форму логина
     return render(request, 'web/login.html', {
