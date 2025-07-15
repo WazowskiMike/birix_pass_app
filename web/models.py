@@ -3,6 +3,8 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.crypto import get_random_string
 from django.contrib.auth.hashers import make_password, check_password
+from django.core.exceptions import ValidationError
+import re
 
 class MasterConfig(models.Model):
     """
@@ -35,7 +37,6 @@ class MasterConfig(models.Model):
         self.password_hash = make_password(raw_password)
 
 class Category(models.Model):
-    # Убрано поле owner, чтобы категории не были привязаны к пользователю
     name = models.CharField(max_length=100)
 
     def __str__(self):
@@ -53,3 +54,26 @@ class Entry(models.Model):
 
     def __str__(self):
         return self.title
+    
+class BankCard(models.Model):
+    category = models.ForeignKey(
+        Category,
+        related_name='bank_cards',
+        on_delete=models.CASCADE
+    )
+    title = models.CharField(max_length=100)
+    card_number = models.CharField(max_length=20)
+    full_name = models.CharField(max_length=200)
+    expiry_date = models.CharField(max_length=5)
+    cvv = models.CharField(max_length=4)
+    description = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        if not re.match(r'^(0[1-9]|1[0-2])\/\d{2}$', self.expiry_date):
+            raise ValidationError("Неверный формат даты. Используйте MM/YY.")
+
+    def __str__(self):
+        return f"{self.title} - ****{self.card_number[-4:]}"

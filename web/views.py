@@ -3,8 +3,8 @@ from django.shortcuts import render, get_object_or_404,redirect
 from django.conf import settings
 from django.urls import reverse
 from django.contrib import messages
-from .models import Category, Entry, MasterConfig
-from .forms import MasterLoginForm, EntryForm, CategoryForm
+from .models import Category, Entry, MasterConfig, BankCard
+from .forms import MasterLoginForm, EntryForm, CategoryForm, BankCardForm
 from django.utils.decorators import method_decorator
 from .decorators import master_required
 from django.contrib import messages
@@ -22,11 +22,11 @@ def master_required(view_func):
 # Login/Logout мастера
 @csrf_exempt
 def login_view(request):
-    # Загружаем текущую конфигурацию мастер-пароля
-    mc = MasterConfig.load()
+    # если в окружении есть MASTER_PASSWORD_LOCAL и DEBUG=True, то используем его
+    master_password_override = getattr(settings, "MASTER_PASSWORD_LOCAL", None)
+    print(master_password_override)
 
-    # Определяем, куда делать redirect после успешного логина
-    # Сначала смотрим POST, потом GET, потом дефолт
+    mc = MasterConfig.load()
     next_url = (
         request.POST.get('next')
         or request.GET.get('next')
@@ -35,18 +35,20 @@ def login_view(request):
 
     if request.method == 'POST':
         entered = request.POST.get('password', '')
-        if mc.check_password(entered):
-            # Успешная авторизация — ставим флаг в сессию
-            request.session['is_master_authenticated'] = True
-            # Делаем настоящий HTTP-redirect, который iframe подхватит
-            return redirect(next_url)
-        else:
-            messages.error(request, 'Wrong master-password.')
 
-    # При GET или невалидном POST — рендерим форму логина
-    return render(request, 'web/login.html', {
-        'next': next_url,
-    })
+        # если есть оверрайд и мы в DEBUG
+        if settings.DEBUG and master_password_override:
+            if entered == master_password_override:
+                request.session['is_master_authenticated'] = True
+                return redirect(next_url)
+        else:
+            if mc.check_password(entered):
+                request.session['is_master_authenticated'] = True
+                return redirect(next_url)
+
+        messages.error(request, 'Wrong master-password.')
+
+    return render(request, 'web/login.html', {'next': next_url})
 
 @csrf_exempt
 def logout_view(request):
@@ -138,3 +140,55 @@ def change_password(request):
             return redirect('category_list')
 
     return render(request, 'web/change_password.html')
+
+@csrf_exempt
+@master_required
+def card_list(request):
+    categories = Category.objects.all()
+    category_id = request.GET.get('category')
+
+    if category_id:
+        category = get_object_or_404(Category, pk=category_id)
+        cards = BankCard.objects.filter(category=category)
+    else:
+        category = None
+        cards = BankCard.objects.select_related('category').all()
+
+    return render(request, 'web/card_list.html', {
+        'categories': categories,
+        'cards': cards,
+        'selected_category': category,
+    })
+
+@csrf_exempt
+@master_required
+def card_form(request, pk=None):
+    card = get_object_or_404(BankCard, pk=pk) if pk else None
+    form = BankCardForm(request.POST or None, instance=card)
+    if form.is_valid():
+        form.save()
+        return redirect('card_list')
+    return render(request, 'web/card_form.html', {'form': form})
+
+@csrf_exempt
+@master_required
+def card_delete(request, pk):
+    card = get_object_or_404(BankCard, pk=pk)
+    if request.method == 'POST':
+        card.delete()
+        return redirect('card_list')
+    return render(request, 'web/card_confirm_delete.html', {'card': card})
+
+@csrf_exempt
+@master_required
+def category_detail(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    entries = Entry.objects.filter(category=category)
+    cards = BankCard.objects.filter(category=category)
+
+    return render(request, 'web/category_detail.html', {
+        'selected_category': category,
+        'entries': entries,
+        'cards': cards,
+        'categories': Category.objects.all(),  # для бокового меню
+    })

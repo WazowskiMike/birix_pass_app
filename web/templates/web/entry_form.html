@@ -1,17 +1,98 @@
 {% extends 'web/base.html' %}
+
 {% block content %}
-<div class="col-md-6 offset-md-3">
-  <h2>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Entry</h2>
-  <form method="post">{% csrf_token %}
-    {% for field in form %}
+<div class="container py-4">
+  <h1 class="mb-3">
+    {% if form.instance.pk %}
+      Edit Password
+    {% else %}
+      Add Password
+    {% endif %}
+  </h1>
+
+  <form method="post" id="entryForm" novalidate>
+    {% csrf_token %}
+
+    <!-- Title -->
     <div class="mb-3">
-      {{ field.label_tag }}
-      {{ field }}
-      {{ field.errors }}
+      <label for="id_title" class="form-label">Title</label>
+      <input type="text" name="title" id="id_title"
+             class="form-control"
+             value="{{ form.instance.title|default_if_none:'' }}"
+             required>
+      <div class="invalid-feedback">Введите название записи.</div>
     </div>
-    {% endfor %}
-    <button type="submit" class="btn btn-primary">Save</button>
+
+    <!-- Username -->
+    <div class="mb-3">
+      <label for="id_username" class="form-label">Username</label>
+      <input type="text" name="username" id="id_username"
+             class="form-control"
+             value="{{ form.instance.username|default_if_none:'' }}"
+             required>
+      <div class="invalid-feedback">Введите имя пользователя.</div>
+    </div>
+
+    <!-- Password -->
+    <div class="mb-3">
+      <label for="id_password" class="form-label">Password</label>
+      <input type="text" name="password" id="id_password"
+             class="form-control"
+             value="{{ form.instance.password|default_if_none:'' }}"
+             required>
+      <div class="invalid-feedback">Введите пароль.</div>
+    </div>
+
+    <!-- URL -->
+    <div class="mb-3">
+      <label for="id_url" class="form-label">URL (optional)</label>
+      <input type="url" name="url" id="id_url"
+             class="form-control"
+             value="{{ form.instance.url|default_if_none:'' }}">
+      <div class="invalid-feedback">Введите корректный URL.</div>
+    </div>
+
+    <!-- Notes -->
+    <div class="mb-3">
+      <label for="id_notes" class="form-label">Notes</label>
+      <textarea name="notes" id="id_notes"
+                class="form-control"
+                rows="3">{{ form.instance.notes }}</textarea>
+    </div>
+
+    <!-- Category -->
+    <div class="mb-3">
+      <label for="id_category" class="form-label">Category</label>
+      <select name="category" id="id_category" class="form-select" required>
+        {% for cat in form.fields.category.queryset %}
+          <option value="{{ cat.id }}"
+            {% if form.instance.category and form.instance.category.id == cat.id %}selected{% endif %}>
+            {{ cat.name }}
+          </option>
+        {% endfor %}
+      </select>
+      <div class="invalid-feedback">Выберите категорию.</div>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+      {% if form.instance.pk %}Save{% else %}Add{% endif %}
+    </button>
     <a href="{% url 'entry_list' %}" class="btn btn-secondary">Cancel</a>
   </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('entryForm');
+  form.addEventListener('submit', function (event) {
+    if (!form.checkValidity()) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    form.classList.add('was-validated');
+  }, false);
+});
+</script>
 {% endblock %}

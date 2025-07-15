@@ -1,0 +1,256 @@
+{% extends 'web/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+/>
+<style>
+  .collapse,
+  .collapsing {
+    transition: none !important;
+  }
+  span[data-value],
+  .toggle-visibility {
+    cursor: pointer;
+  }
+  .copy-tooltip {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: rgba(0,0,0,0.8);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    z-index: 1200;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <h1 class="mb-4">Category: “{{ selected_category.name }}”</h1>
+
+  <!-- ===== Блок паролей ===== -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Passwords</h2>
+    <a
+      href="{% url 'entry_add' %}?category={{ selected_category.id }}"
+      class="btn btn-success"
+    >+ Add Password</a>
+  </div>
+
+  {% if entries %}
+    <div class="mb-3">
+      <input type="text" id="searchEntry" class="form-control" placeholder="Search passwords by title...">
+    </div>
+
+    <table class="table table-striped align-middle position-relative" id="passwordTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Username</th>
+          <th>Password</th>
+          <th>Description</th>
+          <th>Link</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in entries %}
+        <tr>
+          <td class="title-cell">{{ e.title }}</td>
+          <td>
+            <div class="position-relative d-inline-block">
+              <span class="masked me-2" data-value="{{ e.username }}" id="loginText{{ e.id }}">••••••••</span>
+              <i class="bi bi-eye-fill toggle-visibility" data-target="loginText{{ e.id }}"></i>
+            </div>
+          </td>
+          <td>
+            <div class="position-relative d-inline-block">
+              <span class="masked me-2" data-value="{{ e.password }}" id="passText{{ e.id }}">••••••••</span>
+              <i class="bi bi-eye-fill toggle-visibility" data-target="passText{{ e.id }}"></i>
+            </div>
+          </td>
+          <td class="position-relative" style="white-space: nowrap;">
+            {% if e.notes %}
+            <button class="btn btn-sm btn-info" type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#notesBlock{{ e.id }}">Description</button>
+            <div class="collapse position-absolute bg-white border rounded pt-4 pb-2 px-2 text-break"
+                 id="notesBlock{{ e.id }}"
+                 style="z-index:1050;top:100%;left:0;min-width:200px;max-width:300px;max-height:200px;overflow:auto;">
+              <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                data-bs-toggle="collapse" data-bs-target="#notesBlock{{ e.id }}"></button>
+              {{ e.notes|linebreaksbr }}
+            </div>
+            {% endif %}
+          </td>
+          <td>
+            {% if e.url %}
+            <a href="{{ e.url }}" target="_blank" class="btn btn-sm btn-outline-primary">🔗</a>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'entry_edit' e.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+            <a href="{% url 'entry_delete' e.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-info">No passwords in this category.</div>
+  {% endif %}
+
+  <!-- ===== Блок карт ===== -->
+  <div class="d-flex justify-content-between align-items-center mb-3 mt-5">
+    <h2 class="mb-0">Cards</h2>
+    <a
+      href="{% url 'card_add' %}?category={{ selected_category.id }}"
+      class="btn btn-success"
+    >+ Add Card</a>
+  </div>
+
+  {% if cards %}
+    <div class="mb-3">
+      <input type="text" id="searchCard" class="form-control" placeholder="Search cards by title...">
+    </div>
+
+    <table class="table table-striped align-middle position-relative" id="cardTable">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Card Number</th>
+          <th>Full Name</th>
+          <th>Expiry</th>
+          <th>CVV</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in cards %}
+        <tr>
+          <td class="title-cell">{{ c.title }}</td>
+          <td>
+            <div class="position-relative d-inline-block">
+              <span class="masked me-2" data-value="{{ c.card_number }}" id="cardNum{{ c.id }}">••••••••</span>
+              <i class="bi bi-eye-fill toggle-visibility" data-target="cardNum{{ c.id }}"></i>
+            </div>
+          </td>
+          <td>
+            <div class="position-relative d-inline-block">
+              <span class="masked me-2" data-value="{{ c.full_name }}" id="fullName{{ c.id }}">••••••••</span>
+              <i class="bi bi-eye-fill toggle-visibility" data-target="fullName{{ c.id }}"></i>
+            </div>
+          </td>
+          <td>
+            <div class="position-relative d-inline-block">
+              <span class="masked me-2" data-value="{{ c.expiry_date }}" id="expiry{{ c.id }}">••••</span>
+              <i class="bi bi-eye-fill toggle-visibility" data-target="expiry{{ c.id }}"></i>
+            </div>
+          </td>
+          <td>
+            <div class="position-relative d-inline-block">
+              <span class="masked me-2" data-value="{{ c.cvv }}" id="cvv{{ c.id }}">•••</span>
+              <i class="bi bi-eye-fill toggle-visibility" data-target="cvv{{ c.id }}"></i>
+            </div>
+          </td>
+          <td class="position-relative" style="white-space: nowrap;">
+            {% if c.description %}
+            <button class="btn btn-sm btn-info" type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#descBlock{{ c.id }}">Description</button>
+            <div class="collapse position-absolute bg-white border rounded pt-4 pb-2 px-2 text-break"
+                 id="descBlock{{ c.id }}"
+                 style="z-index:1050;top:100%;left:0;min-width:200px;max-width:300px;max-height:200px;overflow:auto;">
+              <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                data-bs-toggle="collapse" data-bs-target="#descBlock{{ c.id }}"></button>
+              {{ c.description|linebreaksbr }}
+            </div>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'card_edit' c.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+            <a href="{% url 'card_delete' c.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-info">No cards in this category.</div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // ===== Поиск по паролям =====
+  const searchEntry = document.getElementById('searchEntry');
+  const entryTable = document.getElementById('passwordTable');
+  if (searchEntry) {
+    searchEntry.addEventListener('input', () => {
+      const filter = searchEntry.value.trim().toLowerCase();
+      entryTable.querySelectorAll('tbody tr').forEach(row => {
+        const title = row.querySelector('.title-cell').textContent.toLowerCase();
+        row.style.display = title.includes(filter) ? '' : 'none';
+      });
+    });
+  }
+
+  // ===== Поиск по картам =====
+  const searchCard = document.getElementById('searchCard');
+  const cardTable = document.getElementById('cardTable');
+  if (searchCard) {
+    searchCard.addEventListener('input', () => {
+      const filter = searchCard.value.trim().toLowerCase();
+      cardTable.querySelectorAll('tbody tr').forEach(row => {
+        const title = row.querySelector('.title-cell').textContent.toLowerCase();
+        row.style.display = title.includes(filter) ? '' : 'none';
+      });
+    });
+  }
+
+  // ===== Маскировка и показ =====
+  document.querySelectorAll('.toggle-visibility').forEach(icon => {
+    icon.addEventListener('click', () => {
+      const span = document.getElementById(icon.dataset.target);
+      const isMasked = span.classList.contains('masked');
+      if (isMasked) {
+        span.textContent = span.dataset.value;
+        icon.classList.replace('bi-eye-fill', 'bi-eye-slash-fill');
+      } else {
+        const dots = '•'.repeat(span.dataset.value.length);
+        span.textContent = dots;
+        icon.classList.replace('bi-eye-slash-fill', 'bi-eye-fill');
+      }
+      span.classList.toggle('masked');
+    });
+  });
+
+  // ===== Копирование по клику =====
+  document.querySelectorAll('.masked').forEach(span => {
+    span.addEventListener('click', () => {
+      navigator.clipboard.writeText(span.dataset.value).then(() => {
+        const container = span.parentElement;
+        const old = container.querySelector('.copy-tooltip');
+        if (old) old.remove();
+        const tip = document.createElement('div');
+        tip.className = 'copy-tooltip';
+        tip.textContent = 'Copied';
+        container.appendChild(tip);
+        setTimeout(() => tip.remove(), 1000);
+      });
+    });
+  });
+});
+</script>
+{% endblock %}

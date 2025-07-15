@@ -18,6 +18,7 @@
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item"><a class="nav-link" href="{% url 'category_list' %}">Categories</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'entry_list' %}">All Passwords</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'card_list' %}">All Cards</a></li>
         </ul>
         <ul class="navbar-nav ms-auto">
           <li class="nav-item"><a class="nav-link" href="{% url 'change_password' %}">Settings</a></li>
@@ -38,7 +39,7 @@
           <ul class="list-group list-group-flush">
             {% for cat in categories %}
               <li class="list-group-item">
-                <a href="{% url 'entry_list' %}?category={{ cat.id }}">{{ cat.name }}</a>
+                <a href="{% url 'category_detail' cat.id %}">{{ cat.name }}</a>
               </li>
             {% empty %}
               <li class="list-group-item text-muted">No categories</li>
