@@ -4,76 +4,100 @@
 <div class="container py-4">
   <h1 class="mb-3">
     {% if form.instance.pk %}
-      Edit Card
+      Edit Payment
     {% else %}
-      Add Card
+      Add Payment
     {% endif %}
   </h1>
 
   <form method="post" id="cardForm" novalidate>
     {% csrf_token %}
 
-    <!-- Title -->
+    <!-- Title (required) -->
     <div class="mb-3">
       <label for="id_title" class="form-label">Title</label>
       <input type="text" name="title" id="id_title"
              class="form-control"
              value="{{ form.instance.title|default_if_none:'' }}"
              required>
-      <div class="invalid-feedback">Введите название карты.</div>
+      <div class="invalid-feedback">Please enter the card title.</div>
     </div>
 
-    <!-- Card Number -->
+    <!-- Card Number (optional) -->
     <div class="mb-3">
-      <label for="id_card_number" class="form-label">Card Number</label>
+      <label for="id_card_number" class="form-label">Payment Number</label>
       <input type="text" name="card_number" id="id_card_number"
              class="form-control"
              maxlength="19" placeholder="0000 0000 0000 0000"
              value="{{ form.instance.card_number|default_if_none:'' }}"
-             required pattern="^\d{4} \d{4} \d{4} \d{4}$">
-      <div class="invalid-feedback">Введите 16 цифр (формат: 0000 0000 0000 0000).</div>
+             pattern="^\d{4} \d{4} \d{4} \d{4}$">
+      <div class="invalid-feedback">Please enter 16 digits (format: 0000 0000 0000 0000).</div>
     </div>
 
-    <!-- Full Name -->
+    <!-- Full Name (optional) -->
     <div class="mb-3">
       <label for="id_full_name" class="form-label">Full Name</label>
       <input type="text" name="full_name" id="id_full_name"
              class="form-control"
-             value="{{ form.instance.full_name|default_if_none:'' }}"
-             required>
-      <div class="invalid-feedback">Введите имя владельца карты.</div>
+             value="{{ form.instance.full_name|default_if_none:'' }}">
+      <div class="invalid-feedback">Please enter the cardholder name.</div>
     </div>
 
-    <!-- Expiry Date -->
+    <!-- Expiry Date (optional) -->
     <div class="mb-3">
       <label for="id_expiry_date" class="form-label">Expiry Date (MM/YY)</label>
       <input type="text" name="expiry_date" id="id_expiry_date"
              class="form-control"
              maxlength="5" placeholder="MM/YY"
              value="{{ form.instance.expiry_date|default_if_none:'' }}"
-             required pattern="^(0[1-9]|1[0-2])\/\d{2}$">
-      <div class="invalid-feedback">Введите дату окончания действия (MM/YY).</div>
+             pattern="^(0[1-9]|1[0-2])\/\d{2}$">
+      <div class="invalid-feedback">Please enter the expiry date (MM/YY).</div>
     </div>
 
-    <!-- CVV -->
+    <!-- CVV (optional) -->
     <div class="mb-3">
       <label for="id_cvv" class="form-label">CVV</label>
       <input type="text" name="cvv" id="id_cvv"
              class="form-control"
              maxlength="3" placeholder="123"
              value="{{ form.instance.cvv|default_if_none:'' }}"
-             required pattern="^\d{3}$">
-      <div class="invalid-feedback">Введите 3 цифры CVV.</div>
+             pattern="^\d{3}$">
+      <div class="invalid-feedback">Please enter the 3-digit CVV.</div>
     </div>
 
-    <!-- Description -->
+    <!-- Is Payment -->
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" id="id_is_payment" name="is_payment"
+        {% if form.instance.is_payment %}checked{% endif %}>
+      <label class="form-check-label" for="id_is_payment">
+        Payment
+      </label>
+    </div>
+
+    <!-- Routing Number (optional, shows only when payment) -->
+    <div class="mb-3 payment-field" style="display:none;">
+      <label for="id_routing_number" class="form-label">Routing Number</label>
+      <input type="text" name="routing_number" id="id_routing_number"
+            class="form-control"
+            value="{{ form.instance.routing_number|default_if_none:'' }}">
+    </div>
+
+    <!-- Account Number (optional, shows only when payment) -->
+    <div class="mb-3 payment-field" style="display:none;">
+      <label for="id_account_number" class="form-label">Account Number</label>
+      <input type="text" name="account_number" id="id_account_number"
+            class="form-control"
+            value="{{ form.instance.account_number|default_if_none:'' }}">
+    </div>
+
+    <!-- Description (optional) -->
     <div class="mb-3">
       <label for="id_description" class="form-label">Description</label>
       <textarea name="description" id="id_description"
                 class="form-control" rows="3">{{ form.instance.description }}</textarea>
     </div>
 
-    <!-- Category -->
+    <!-- Category (required) -->
     <div class="mb-3">
       <label for="id_category" class="form-label">Category</label>
       <select name="category" id="id_category" class="form-select" required>
@@ -84,7 +108,7 @@
           </option>
         {% endfor %}
       </select>
-      <div class="invalid-feedback">Выберите категорию.</div>
+      <div class="invalid-feedback">Please select a category.</div>
     </div>
 
     <button type="submit" class="btn btn-success">
@@ -98,12 +122,24 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  const paymentCheckbox = document.getElementById('id_is_payment');
+  const paymentFields = document.querySelectorAll('.payment-field');
+
+  function togglePaymentFields() {
+    paymentFields.forEach(f => f.style.display = paymentCheckbox.checked ? 'block' : 'none');
+  }
+
+  togglePaymentFields();
+  paymentCheckbox.addEventListener('change', togglePaymentFields);
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
   const cardNumberInput = document.getElementById('id_card_number');
   const expiryInput = document.getElementById('id_expiry_date');
   const cvvInput = document.getElementById('id_cvv');
   const form = document.getElementById('cardForm');
 
-  // Маска для номера карты: 4 группы по 4
   cardNumberInput.addEventListener('input', (e) => {
     let value = e.target.value.replace(/\D/g, '');
     value = value.substring(0, 16);
@@ -114,7 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
     e.target.value = parts.join(' ');
   });
 
-  // Маска для даты: MM/YY
   expiryInput.addEventListener('input', (e) => {
     let value = e.target.value.replace(/\D/g, '');
     if (value.length > 4) value = value.substring(0,4);
@@ -125,12 +160,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Маска для CVV
   cvvInput.addEventListener('input', (e) => {
     e.target.value = e.target.value.replace(/\D/g, '').substring(0,3);
   });
 
-  // Bootstrap validation
   form.addEventListener('submit', function (event) {
     if (!form.checkValidity()) {
       event.preventDefault();

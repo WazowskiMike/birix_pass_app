@@ -13,7 +13,6 @@
   <form method="post" id="entryForm" novalidate>
     {% csrf_token %}
 
-    <!-- Title -->
     <div class="mb-3">
       <label for="id_title" class="form-label">Title</label>
       <input type="text" name="title" id="id_title"
@@ -23,7 +22,6 @@
       <div class="invalid-feedback">Введите название записи.</div>
     </div>
 
-    <!-- Username -->
     <div class="mb-3">
       <label for="id_username" class="form-label">Username</label>
       <input type="text" name="username" id="id_username"
@@ -33,7 +31,6 @@
       <div class="invalid-feedback">Введите имя пользователя.</div>
     </div>
 
-    <!-- Password -->
     <div class="mb-3">
       <label for="id_password" class="form-label">Password</label>
       <input type="text" name="password" id="id_password"
@@ -43,7 +40,6 @@
       <div class="invalid-feedback">Введите пароль.</div>
     </div>
 
-    <!-- URL -->
     <div class="mb-3">
       <label for="id_url" class="form-label">URL (optional)</label>
       <input type="url" name="url" id="id_url"
@@ -52,7 +48,6 @@
       <div class="invalid-feedback">Введите корректный URL.</div>
     </div>
 
-    <!-- Notes -->
     <div class="mb-3">
       <label for="id_notes" class="form-label">Notes</label>
       <textarea name="notes" id="id_notes"
@@ -60,7 +55,6 @@
                 rows="3">{{ form.instance.notes }}</textarea>
     </div>
 
-    <!-- Category -->
     <div class="mb-3">
       <label for="id_category" class="form-label">Category</label>
       <select name="category" id="id_category" class="form-select" required>

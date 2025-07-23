@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404,redirect
-# from .utils import bx_redirect as redirect
+
 from django.conf import settings
 from django.urls import reverse
 from django.contrib import messages
@@ -19,10 +19,9 @@ def master_required(view_func):
         return view_func(request, *args, **kwargs)
     return wrapper
 
-# Login/Logout мастера
 @csrf_exempt
 def login_view(request):
-    # если в окружении есть MASTER_PASSWORD_LOCAL и DEBUG=True, то используем его
+
     master_password_override = getattr(settings, "MASTER_PASSWORD_LOCAL", None)
     print(master_password_override)
 
@@ -36,7 +35,6 @@ def login_view(request):
     if request.method == 'POST':
         entered = request.POST.get('password', '')
 
-        # если есть оверрайд и мы в DEBUG
         if settings.DEBUG and master_password_override:
             if entered == master_password_override:
                 request.session['is_master_authenticated'] = True
@@ -55,7 +53,6 @@ def logout_view(request):
     request.session.flush()
     return redirect('login')
 
-# Основные страницы
 @csrf_exempt
 @master_required
 def index(request):
@@ -97,7 +94,7 @@ def entry_list(request):
         entries = Entry.objects.filter(category=category)
     else:
         category = None
-        entries = Entry.objects.select_related('category').all()  # ВСЕ записи
+        entries = Entry.objects.select_related('category').all() 
 
     return render(request, 'web/entry_list.html', {
         'categories': categories,
@@ -190,5 +187,5 @@ def category_detail(request, pk):
         'selected_category': category,
         'entries': entries,
         'cards': cards,
-        'categories': Category.objects.all(),  # для бокового меню
+        'categories': Category.objects.all(), 
     })

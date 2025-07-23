@@ -10,7 +10,6 @@ class MasterConfig(models.Model):
     """
     Хранит единственный объект с мастер-паролем.
     """
-    # Храним хэш пароля
     password_hash = models.CharField(max_length=128, blank=False)
 
     @classmethod
@@ -23,7 +22,6 @@ class MasterConfig(models.Model):
         try:
             return cls.objects.get()
         except ObjectDoesNotExist:
-            # Создаём запись с пустым паролем
             instance = cls(password_hash=make_password(get_random_string()))
             instance.save()
             return instance
@@ -62,18 +60,21 @@ class BankCard(models.Model):
         on_delete=models.CASCADE
     )
     title = models.CharField(max_length=100)
-    card_number = models.CharField(max_length=20)
-    full_name = models.CharField(max_length=200)
-    expiry_date = models.CharField(max_length=5)
-    cvv = models.CharField(max_length=4)
+    card_number = models.CharField(max_length=20, blank=True, null=True)
+    full_name = models.CharField(max_length=200, blank=True, null=True)
+    expiry_date = models.CharField(max_length=5, blank=True, null=True)
+    cvv = models.CharField(max_length=4, blank=True, null=True)
     description = models.TextField(blank=True)
-
+    is_payment = models.BooleanField(default=False)
+    routing_number = models.CharField(max_length=20, blank=True, null=True)
+    account_number = models.CharField(max_length=20, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def clean(self):
-        if not re.match(r'^(0[1-9]|1[0-2])\/\d{2}$', self.expiry_date):
-            raise ValidationError("Неверный формат даты. Используйте MM/YY.")
+        if self.expiry_date:
+            if not re.match(r'^(0[1-9]|1[0-2])\/\d{2}$', self.expiry_date):
+                raise ValidationError("Invalid date format. Use MM/YY.")
 
     def __str__(self):
         return f"{self.title} - ****{self.card_number[-4:]}"

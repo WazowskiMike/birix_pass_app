@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container py-4">
-  <h1>Delete Card</h1>
+  <h1>Delete Payment</h1>
   <p>Are you sure you want to delete <strong>{{ card.title }}</strong> (****{{ card.card_number|slice:'-4:' }})?</p>
   <form method="post">
     {% csrf_token %}
