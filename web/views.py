@@ -91,10 +91,10 @@ def entry_list(request):
 
     if category_id:
         category = get_object_or_404(Category, pk=category_id)
-        entries = Entry.objects.filter(category=category)
+        entries = Entry.objects.filter(category=category).order_by('-id')
     else:
         category = None
-        entries = Entry.objects.select_related('category').all() 
+        entries = Entry.objects.select_related('category').all().order_by('-id')
 
     return render(request, 'web/entry_list.html', {
         'categories': categories,
@@ -146,10 +146,10 @@ def card_list(request):
 
     if category_id:
         category = get_object_or_404(Category, pk=category_id)
-        cards = BankCard.objects.filter(category=category)
+        cards = BankCard.objects.filter(category=category).order_by('-id')
     else:
         category = None
-        cards = BankCard.objects.select_related('category').all()
+        cards = BankCard.objects.select_related('category').all().order_by('-id')
 
     return render(request, 'web/card_list.html', {
         'categories': categories,
@@ -180,8 +180,8 @@ def card_delete(request, pk):
 @master_required
 def category_detail(request, pk):
     category = get_object_or_404(Category, pk=pk)
-    entries = Entry.objects.filter(category=category)
-    cards = BankCard.objects.filter(category=category)
+    entries = Entry.objects.filter(category=category).order_by('-id')
+    cards = BankCard.objects.filter(category=category).order_by('-id')
 
     return render(request, 'web/category_detail.html', {
         'selected_category': category,

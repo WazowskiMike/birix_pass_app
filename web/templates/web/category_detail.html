@@ -111,6 +111,9 @@
           {% endfor %}
         </tbody>
       </table>
+      <div class="text-center mt-2">
+        <button id="loadMorePasswords" class="btn btn-outline-primary">Load more passwords</button>
+      </div>
     </div>
   {% else %}
     <div class="alert alert-info">No passwords in this category.</div>
@@ -212,6 +215,9 @@
           {% endfor %}
         </tbody>
       </table>
+      <div class="text-center mt-2">
+        <button id="loadMoreCards" class="btn btn-outline-primary">Load more payments</button>
+      </div>
     </div>
   {% else %}
     <div class="alert alert-info">No payments in this category.</div>
@@ -220,6 +226,94 @@
 {% endblock %}
 
 {% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // ==== Функция пагинации для таблиц ====
+  function paginateTable(tableSelector, buttonSelector, initialLimit = 10, step = 10) {
+    const rows = document.querySelectorAll(tableSelector + ' tbody tr');
+    let visibleCount = initialLimit;
+
+    // скрываем все, кроме первых visibleCount
+    function updateVisibility() {
+      rows.forEach((row, idx) => {
+        row.style.display = idx < visibleCount ? '' : 'none';
+      });
+      // скрываем кнопку, если больше нечего показывать
+      const btn = document.querySelector(buttonSelector);
+      if (btn) btn.style.display = visibleCount >= rows.length ? 'none' : '';
+    }
+
+    updateVisibility();
+
+    const btn = document.querySelector(buttonSelector);
+    if (btn) {
+      btn.addEventListener('click', () => {
+        visibleCount += step;
+        updateVisibility();
+      });
+    }
+  }
+
+  paginateTable('#passwordTable', '#loadMorePasswords');
+  paginateTable('#cardTable', '#loadMoreCards');
+
+  // ==== поиск и маскировка из твоего кода (без изменений) ====
+  const searchEntry = document.getElementById('searchEntry');
+  if (searchEntry) {
+    searchEntry.addEventListener('input', () => {
+      const filter = searchEntry.value.trim().toLowerCase();
+      document.querySelectorAll('#passwordTable tbody tr').forEach(row => {
+        const title = row.querySelector('.title-cell').textContent.toLowerCase();
+        row.style.display = title.includes(filter) ? '' : 'none';
+      });
+    });
+  }
+
+  const searchCard = document.getElementById('searchCard');
+  if (searchCard) {
+    searchCard.addEventListener('input', () => {
+      const filter = searchCard.value.trim().toLowerCase();
+      document.querySelectorAll('#cardTable tbody tr').forEach(row => {
+        const title = row.querySelector('.title-cell').textContent.toLowerCase();
+        row.style.display = title.includes(filter) ? '' : 'none';
+      });
+    });
+  }
+
+  document.querySelectorAll('.toggle-visibility').forEach(icon => {
+    icon.addEventListener('click', () => {
+      const span = document.getElementById(icon.dataset.target);
+      if (!span) return;
+      const isMasked = span.classList.contains('masked');
+      if (isMasked) {
+        span.textContent = span.dataset.value;
+        icon.classList.replace('bi-eye-fill', 'bi-eye-slash-fill');
+      } else {
+        const dots = '•'.repeat(span.dataset.value.length);
+        span.textContent = dots;
+        icon.classList.replace('bi-eye-slash-fill', 'bi-eye-fill');
+      }
+      span.classList.toggle('masked');
+    });
+  });
+
+  document.querySelectorAll('.masked').forEach(span => {
+    span.addEventListener('click', () => {
+      if (!span.dataset.value) return;
+      navigator.clipboard.writeText(span.dataset.value).then(() => {
+        const container = span.parentElement;
+        const old = container.querySelector('.copy-tooltip');
+        if (old) old.remove();
+        const tip = document.createElement('div');
+        tip.className = 'copy-tooltip';
+        tip.textContent = 'Copied';
+        container.appendChild(tip);
+        setTimeout(() => tip.remove(), 1000);
+      });
+    });
+  });
+});
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const searchEntry = document.getElementById('searchEntry');
