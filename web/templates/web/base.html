@@ -9,7 +9,7 @@
   <style>
     #toggleCategoriesBtn {
       position: fixed;
-      top: 80px; /* отступ сверху, чтобы не залезала под navbar */
+      top: 80px;
       right: 0;
       z-index: 2000;
       background-color: #0d6efd;
@@ -28,7 +28,7 @@
     #asideBlock {
       position: fixed;
       top: 0;
-      right: -300px; /* спрятан */
+      right: -300px;
       width: 300px;
       height: 100%;
       background: #f8f9fa;
@@ -41,7 +41,6 @@
     #asideBlock.show {
       right: 0;
     }
-
     main.col-md-9 {
       width: 100%;
     }
@@ -58,7 +57,8 @@
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item"><a class="nav-link" href="{% url 'category_list' %}">Categories</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'entry_list' %}">All Passwords</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'card_list' %}">All Payments</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'card_list' %}">All Cards</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'account_list' %}">All Bank Accounts</a></li>
         </ul>
         <ul class="navbar-nav ms-auto">
           <li class="nav-item"><a class="nav-link" href="{% url 'change_password' %}">Settings</a></li>

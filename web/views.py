@@ -3,8 +3,8 @@ from django.shortcuts import render, get_object_or_404,redirect
 from django.conf import settings
 from django.urls import reverse
 from django.contrib import messages
-from .models import Category, Entry, MasterConfig, BankCard
-from .forms import MasterLoginForm, EntryForm, CategoryForm, BankCardForm
+from .models import Category, Entry, MasterConfig, BankCard, BankAccount
+from .forms import MasterLoginForm, EntryForm, CategoryForm, BankCardForm, BankAccountForm
 from django.utils.decorators import method_decorator
 from .decorators import master_required
 from django.contrib import messages
@@ -182,10 +182,52 @@ def category_detail(request, pk):
     category = get_object_or_404(Category, pk=pk)
     entries = Entry.objects.filter(category=category).order_by('-id')
     cards = BankCard.objects.filter(category=category).order_by('-id')
+    accounts = BankAccount.objects.filter(category=category).order_by('-id')
 
     return render(request, 'web/category_detail.html', {
         'selected_category': category,
         'entries': entries,
         'cards': cards,
-        'categories': Category.objects.all(), 
+        'accounts': accounts,
+        'categories': Category.objects.all(),
     })
+
+@csrf_exempt
+@master_required
+def account_list(request):
+    categories = Category.objects.all()
+    category_id = request.GET.get('category')
+
+    if category_id:
+        category = get_object_or_404(Category, pk=category_id)
+        accounts = BankAccount.objects.filter(category=category).order_by('-id')
+    else:
+        category = None
+        accounts = BankAccount.objects.select_related('category').all().order_by('-id')
+
+    return render(request, 'web/account_list.html', {
+        'categories': categories,
+        'accounts': accounts,
+        'selected_category': category,
+    })
+
+
+@csrf_exempt
+@master_required
+def account_form(request, pk=None):
+    account = get_object_or_404(BankAccount, pk=pk) if pk else None
+    form = BankAccountForm(request.POST or None, instance=account)
+    if form.is_valid():
+        form.save()
+        return redirect('account_list')
+    return render(request, 'web/account_form.html', {'form': form})
+
+
+@csrf_exempt
+@master_required
+def account_delete(request, pk):
+    account = get_object_or_404(BankAccount, pk=pk)
+    if request.method == 'POST':
+        account.delete()
+        return redirect('account_list')
+    return render(request, 'web/account_confirm_delete.html', {'account': account})

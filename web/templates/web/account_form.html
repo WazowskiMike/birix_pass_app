@@ -1,0 +1,104 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+<div class="container py-4">
+  <h1 class="mb-3">
+    {% if form.instance.pk %}
+      Edit Bank Account
+    {% else %}
+      Add Bank Account
+    {% endif %}
+  </h1>
+
+  <form method="post" id="accountForm" novalidate>
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label for="id_title" class="form-label">Title</label>
+      <input type="text" name="title" id="id_title"
+             class="form-control"
+             value="{{ form.instance.title|default_if_none:'' }}"
+             required>
+      <div class="invalid-feedback">Please enter the account title.</div>
+    </div>
+
+    <div class="mb-3">
+      <label for="id_routing_number" class="form-label">Routing Number</label>
+      <input type="text" name="routing_number" id="id_routing_number"
+             class="form-control"
+             maxlength="9"
+             value="{{ form.instance.routing_number|default_if_none:'' }}"
+             pattern="^\d{9}$">
+      <div class="invalid-feedback">Enter a valid 9‑digit routing number.</div>
+    </div>
+
+    <div class="mb-3">
+      <label for="id_account_number" class="form-label">Account Number</label>
+      <input type="text" name="account_number" id="id_account_number"
+             class="form-control"
+             value="{{ form.instance.account_number|default_if_none:'' }}"
+             required>
+      <div class="invalid-feedback">Please enter the account number.</div>
+    </div>
+
+    <div class="mb-3">
+      <label for="id_account_holder_name" class="form-label">Account Holder Name</label>
+      <input type="text" name="account_holder_name" id="id_account_holder_name"
+             class="form-control"
+             value="{{ form.instance.account_holder_name|default_if_none:'' }}"
+             required>
+      <div class="invalid-feedback">Please enter the account holder name.</div>
+    </div>
+
+    <div class="mb-3">
+      <label for="id_description" class="form-label">Description</label>
+      <textarea name="description" id="id_description"
+                class="form-control" rows="3">{{ form.instance.description }}</textarea>
+    </div>
+
+    <div class="mb-3">
+      <label for="id_category" class="form-label">Category</label>
+      <select name="category" id="id_category" class="form-select" required>
+        {% for cat in form.fields.category.queryset %}
+          <option value="{{ cat.id }}"
+            {% if form.instance.category and form.instance.category.id == cat.id %}selected{% endif %}>
+            {{ cat.name }}
+          </option>
+        {% endfor %}
+      </select>
+      <div class="invalid-feedback">Please select a category.</div>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+      {% if form.instance.pk %}Save{% else %}Add{% endif %}
+    </button>
+    <a href="{% url 'account_list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const routingInput = document.getElementById('id_routing_number');
+  const accountInput = document.getElementById('id_account_number');
+  const form = document.getElementById('accountForm');
+
+  routingInput.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g, '').substring(0,9);
+  });
+
+  accountInput.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\s/g, '');
+  });
+
+  form.addEventListener('submit', function (event) {
+    if (!form.checkValidity()) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    form.classList.add('was-validated');
+  }, false);
+});
+</script>
+{% endblock %}

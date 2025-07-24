@@ -41,20 +41,20 @@
   <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2">
     <h1 class="mb-0">
       {% if selected_category %}
-        Cards in “{{ selected_category.name }}”
+        Bank Accounts in “{{ selected_category.name }}”
       {% else %}
-        All Cards
+        All Bank Accounts
       {% endif %}
     </h1>
     <a
-      href="{% url 'card_add' %}{% if selected_category %}?category={{ selected_category.id }}{% endif %}"
+      href="{% url 'account_add' %}{% if selected_category %}?category={{ selected_category.id }}{% endif %}"
       class="btn btn-success"
     >
-      + Add Card
+      + Add Bank Account
     </a>
   </div>
 
-  {% if cards %}
+  {% if accounts %}
     <div class="mb-3">
       <input
         type="text"
@@ -65,95 +65,77 @@
     </div>
 
     <div class="table-responsive">
-      <table class="table table-striped align-middle position-relative" id="cardTable">
+      <table class="table table-striped align-middle position-relative" id="accountTable">
         <thead class="table-light">
           <tr>
             <th>Title</th>
-            <th>Card Number</th>
-            <th>Full Name</th>
-            <th>Expiry</th>
-            <th>CVV</th>
+            <th>Routing Number</th>
+            <th>Account Number</th>
+            <th>Holder Name</th>
             <th>Description</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {% for c in cards %}
+          {% for a in accounts %}
           <tr>
-            <!-- Title -->
-            <td class="title-cell">{{ c.title }}</td>
+            <td class="title-cell">{{ a.title }}</td>
 
-            <!-- Card Number -->
             <td>
-              {% if c.card_number %}
+              {% if a.routing_number %}
                 <div class="position-relative d-inline-block">
-                  <span class="masked me-2" data-value="{{ c.card_number }}" id="cardNum{{ c.id }}">••••••••</span>
-                  <i class="bi bi-eye-fill toggle-visibility" data-target="cardNum{{ c.id }}"></i>
+                  <span class="masked me-2" data-value="{{ a.routing_number }}" id="routing{{ a.id }}">••••••••</span>
+                  <i class="bi bi-eye-fill toggle-visibility" data-target="routing{{ a.id }}"></i>
                 </div>
               {% else %}
                 <span class="text-muted">—</span>
               {% endif %}
             </td>
 
-            <!-- Full Name -->
             <td>
-              {% if c.full_name %}
+              {% if a.account_number %}
                 <div class="position-relative d-inline-block">
-                  <span class="masked me-2" data-value="{{ c.full_name }}" id="fullName{{ c.id }}">••••••••</span>
-                  <i class="bi bi-eye-fill toggle-visibility" data-target="fullName{{ c.id }}"></i>
+                  <span class="masked me-2" data-value="{{ a.account_number }}" id="accNum{{ a.id }}">••••••••</span>
+                  <i class="bi bi-eye-fill toggle-visibility" data-target="accNum{{ a.id }}"></i>
                 </div>
               {% else %}
                 <span class="text-muted">—</span>
               {% endif %}
             </td>
 
-            <!-- Expiry -->
             <td>
-              {% if c.expiry_date %}
+              {% if a.account_holder_name %}
                 <div class="position-relative d-inline-block">
-                  <span class="masked me-2" data-value="{{ c.expiry_date }}" id="expiry{{ c.id }}">••••</span>
-                  <i class="bi bi-eye-fill toggle-visibility" data-target="expiry{{ c.id }}"></i>
+                  <span class="masked me-2" data-value="{{ a.account_holder_name }}" id="holder{{ a.id }}">••••••••</span>
+                  <i class="bi bi-eye-fill toggle-visibility" data-target="holder{{ a.id }}"></i>
                 </div>
               {% else %}
                 <span class="text-muted">—</span>
               {% endif %}
             </td>
 
-            <!-- CVV -->
-            <td>
-              {% if c.cvv %}
-                <div class="position-relative d-inline-block">
-                  <span class="masked me-2" data-value="{{ c.cvv }}" id="cvv{{ c.id }}">•••</span>
-                  <i class="bi bi-eye-fill toggle-visibility" data-target="cvv{{ c.id }}"></i>
-                </div>
-              {% else %}
-                <span class="text-muted">—</span>
-              {% endif %}
-            </td>
-
-            <!-- Description -->
             <td class="position-relative" style="white-space: nowrap;">
-              {% if c.description %}
+              {% if a.description %}
                 <button
                   class="btn btn-sm btn-info"
                   type="button"
                   data-bs-toggle="collapse"
-                  data-bs-target="#descBlock{{ c.id }}"
+                  data-bs-target="#descAcc{{ a.id }}"
                 >
                   Description
                 </button>
                 <div
                   class="collapse position-absolute bg-white border rounded pt-4 pb-2 px-2 text-break"
-                  id="descBlock{{ c.id }}"
+                  id="descAcc{{ a.id }}"
                   style="z-index:1050;top:100%;left:0;min-width:200px;max-width:300px;max-height:200px;overflow:auto;"
                 >
                   <button
                     type="button"
                     class="btn-close position-absolute top-0 end-0 m-2"
                     data-bs-toggle="collapse"
-                    data-bs-target="#descBlock{{ c.id }}"
+                    data-bs-target="#descAcc{{ a.id }}"
                   ></button>
-                  {{ c.description|linebreaksbr }}
+                  {{ a.description|linebreaksbr }}
                 </div>
               {% else %}
                 <span class="text-muted">—</span>
@@ -162,8 +144,8 @@
 
             <!-- Actions -->
             <td>
-              <a href="{% url 'card_edit' c.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-              <a href="{% url 'card_delete' c.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+              <a href="{% url 'account_edit' a.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+              <a href="{% url 'account_delete' a.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
             </td>
           </tr>
           {% endfor %}
@@ -173,9 +155,9 @@
   {% else %}
     <div class="alert alert-info">
       {% if selected_category %}
-        There are no cards in this category yet.
+        There are no bank accounts in this category yet.
       {% else %}
-        No cards available.
+        No bank accounts available.
       {% endif %}
     </div>
   {% endif %}
@@ -185,9 +167,8 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // Поиск по таблице
   const searchInput = document.getElementById('searchInput');
-  const table = document.getElementById('cardTable');
+  const table = document.getElementById('accountTable');
   if (searchInput) {
     searchInput.addEventListener('input', () => {
       const filter = searchInput.value.trim().toLowerCase();
@@ -198,7 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Показать/скрыть значения
   document.querySelectorAll('.toggle-visibility').forEach(icon => {
     icon.addEventListener('click', () => {
       const span = document.getElementById(icon.dataset.target);
@@ -216,7 +196,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Копирование по клику
   document.querySelectorAll('.masked').forEach(span => {
     span.addEventListener('click', () => {
       if (!span.dataset.value) return;

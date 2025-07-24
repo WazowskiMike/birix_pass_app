@@ -5,37 +5,20 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"/>
 <style>
   .collapse,
-  .collapsing {
-    transition: none !important;
-  }
+  .collapsing { transition: none !important; }
   span[data-value],
-  .toggle-visibility {
-    cursor: pointer;
-  }
+  .toggle-visibility { cursor: pointer; }
   .copy-tooltip {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background: rgba(0,0,0,0.8);
-    color: #fff;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    white-space: nowrap;
+    position: absolute; top: 100%; left: 0;
+    background: rgba(0,0,0,0.8); color: #fff;
+    padding: 2px 6px; border-radius: 4px;
+    font-size: 0.8rem; white-space: nowrap;
     z-index: 1200;
   }
   @media (max-width: 576px) {
-    td, th {
-      padding: .3rem;
-      font-size: 0.85rem;
-    }
-    h1, h2 {
-      font-size: 1.25rem;
-    }
-    .btn {
-      font-size: 0.8rem;
-      padding: .25rem .5rem;
-    }
+    td, th { padding: .3rem; font-size: 0.85rem; }
+    h1, h2 { font-size: 1.25rem; }
+    .btn { font-size: 0.8rem; padding: .25rem .5rem; }
   }
 </style>
 {% endblock %}
@@ -44,7 +27,7 @@
 <div class="container py-4">
   <h1 class="mb-4">Category: “{{ selected_category.name }}”</h1>
 
-  <!-- ===== Пароли ===== -->
+  <!-- ===== Passwords ===== -->
   <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2">
     <h2 class="mb-0">Passwords</h2>
     <a href="{% url 'entry_add' %}?category={{ selected_category.id }}" class="btn btn-success">+ Add Password</a>
@@ -98,11 +81,7 @@
               </div>
               {% else %}<span class="text-muted">—</span>{% endif %}
             </td>
-            <td>
-              {% if e.url %}
-              <a href="{{ e.url }}" target="_blank" class="btn btn-sm btn-outline-primary">🔗</a>
-              {% else %}<span class="text-muted">—</span>{% endif %}
-            </td>
+            <td>{% if e.url %}<a href="{{ e.url }}" target="_blank" class="btn btn-sm btn-outline-primary">🔗</a>{% else %}<span class="text-muted">—</span>{% endif %}</td>
             <td>
               <a href="{% url 'entry_edit' e.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
               <a href="{% url 'entry_delete' e.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
@@ -119,9 +98,10 @@
     <div class="alert alert-info">No passwords in this category.</div>
   {% endif %}
 
+  <!-- ===== Cards ===== -->
   <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 mt-5 gap-2">
-    <h2 class="mb-0">Payments</h2>
-    <a href="{% url 'card_add' %}?category={{ selected_category.id }}" class="btn btn-success">+ Add Payment</a>
+    <h2 class="mb-0">Cards</h2>
+    <a href="{% url 'card_add' %}?category={{ selected_category.id }}" class="btn btn-success">+ Add Card</a>
   </div>
 
   {% if cards %}
@@ -133,11 +113,10 @@
         <thead class="table-light">
           <tr>
             <th>Title</th>
-            <th>Card Number / Account Number</th>
+            <th>Card Number</th>
             <th>Full Name</th>
             <th>Expiry</th>
             <th>CVV</th>
-            <th>Routing Number</th>
             <th>Description</th>
             <th>Actions</th>
           </tr>
@@ -147,21 +126,12 @@
           <tr>
             <td class="title-cell">{{ c.title }}</td>
             <td>
-              {% if c.is_payment %}
-                {% if c.account_number %}
-                <div class="position-relative d-inline-block">
-                  <span class="masked me-2" data-value="{{ c.account_number }}" id="cardNum{{ c.id }}">••••••••</span>
-                  <i class="bi bi-eye-fill toggle-visibility" data-target="cardNum{{ c.id }}"></i>
-                </div>
-                {% else %}<span class="text-muted">—</span>{% endif %}
-              {% else %}
-                {% if c.card_number %}
-                <div class="position-relative d-inline-block">
-                  <span class="masked me-2" data-value="{{ c.card_number }}" id="cardNum{{ c.id }}">••••••••</span>
-                  <i class="bi bi-eye-fill toggle-visibility" data-target="cardNum{{ c.id }}"></i>
-                </div>
-                {% else %}<span class="text-muted">—</span>{% endif %}
-              {% endif %}
+              {% if c.card_number %}
+              <div class="position-relative d-inline-block">
+                <span class="masked me-2" data-value="{{ c.card_number }}" id="cardNum{{ c.id }}">••••••••</span>
+                <i class="bi bi-eye-fill toggle-visibility" data-target="cardNum{{ c.id }}"></i>
+              </div>
+              {% else %}<span class="text-muted">—</span>{% endif %}
             </td>
             <td>
               {% if c.full_name %}
@@ -187,14 +157,6 @@
               </div>
               {% else %}<span class="text-muted">—</span>{% endif %}
             </td>
-            <td>
-              {% if c.is_payment and c.routing_number %}
-              <div class="position-relative d-inline-block">
-                <span class="masked me-2" data-value="{{ c.routing_number }}" id="routing{{ c.id }}">••••••••</span>
-                <i class="bi bi-eye-fill toggle-visibility" data-target="routing{{ c.id }}"></i>
-              </div>
-              {% else %}<span class="text-muted">—</span>{% endif %}
-            </td>
             <td class="position-relative" style="white-space: nowrap;">
               {% if c.description %}
               <button class="btn btn-sm btn-info" type="button" data-bs-toggle="collapse" data-bs-target="#descBlock{{ c.id }}">Description</button>
@@ -216,11 +178,89 @@
         </tbody>
       </table>
       <div class="text-center mt-2">
-        <button id="loadMoreCards" class="btn btn-outline-primary">Load more payments</button>
+        <button id="loadMoreCards" class="btn btn-outline-primary">Load more cards</button>
       </div>
     </div>
   {% else %}
-    <div class="alert alert-info">No payments in this category.</div>
+    <div class="alert alert-info">No cards in this category.</div>
+  {% endif %}
+
+  <!-- ===== Bank Accounts ===== -->
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 mt-5 gap-2">
+    <h2 class="mb-0">Bank Accounts</h2>
+    <a href="{% url 'account_add' %}?category={{ selected_category.id }}" class="btn btn-success">+ Add Bank Account</a>
+  </div>
+
+  {% if accounts %}
+    <div class="mb-3">
+      <input type="text" id="searchAccount" class="form-control" placeholder="Search accounts by title...">
+    </div>
+    <div class="table-responsive">
+      <table class="table table-striped align-middle position-relative" id="accountTable">
+        <thead class="table-light">
+          <tr>
+            <th>Title</th>
+            <th>Routing Number</th>
+            <th>Account Number</th>
+            <th>Holder Name</th>
+            <th>Description</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in accounts %}
+          <tr>
+            <td class="title-cell">{{ a.title }}</td>
+            <td>
+              {% if a.routing_number %}
+              <div class="position-relative d-inline-block">
+                <span class="masked me-2" data-value="{{ a.routing_number }}" id="routing{{ a.id }}">••••••••</span>
+                <i class="bi bi-eye-fill toggle-visibility" data-target="routing{{ a.id }}"></i>
+              </div>
+              {% else %}<span class="text-muted">—</span>{% endif %}
+            </td>
+            <td>
+              {% if a.account_number %}
+              <div class="position-relative d-inline-block">
+                <span class="masked me-2" data-value="{{ a.account_number }}" id="accNum{{ a.id }}">••••••••</span>
+                <i class="bi bi-eye-fill toggle-visibility" data-target="accNum{{ a.id }}"></i>
+              </div>
+              {% else %}<span class="text-muted">—</span>{% endif %}
+            </td>
+            <td>
+              {% if a.account_holder_name %}
+              <div class="position-relative d-inline-block">
+                <span class="masked me-2" data-value="{{ a.account_holder_name }}" id="holder{{ a.id }}">••••••••</span>
+                <i class="bi bi-eye-fill toggle-visibility" data-target="holder{{ a.id }}"></i>
+              </div>
+              {% else %}<span class="text-muted">—</span>{% endif %}
+            </td>
+            <td>
+              {% if a.description %}
+              <button class="btn btn-sm btn-info" type="button" data-bs-toggle="collapse" data-bs-target="#descAcc{{ a.id }}">Description</button>
+              <div class="collapse position-absolute bg-white border rounded pt-4 pb-2 px-2 text-break"
+                   id="descAcc{{ a.id }}"
+                   style="z-index:1050;top:100%;left:0;min-width:200px;max-width:300px;max-height:200px;overflow:auto;">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                        data-bs-toggle="collapse" data-bs-target="#descAcc{{ a.id }}"></button>
+                {{ a.description|linebreaksbr }}
+              </div>
+              {% else %}<span class="text-muted">—</span>{% endif %}
+            </td>
+            <td>
+              <a href="{% url 'account_edit' a.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+              <a href="{% url 'account_delete' a.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="text-center mt-2">
+        <button id="loadMoreAccounts" class="btn btn-outline-primary">Load more accounts</button>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info">No bank accounts in this category.</div>
   {% endif %}
 </div>
 {% endblock %}
@@ -228,56 +268,44 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // Пагинация
   function paginateTable(tableSelector, buttonSelector, initialLimit = 10, step = 10) {
     const rows = document.querySelectorAll(tableSelector + ' tbody tr');
     let visibleCount = initialLimit;
-
     function updateVisibility() {
-      rows.forEach((row, idx) => {
-        row.style.display = idx < visibleCount ? '' : 'none';
-      });
+      rows.forEach((row, idx) => { row.style.display = idx < visibleCount ? '' : 'none'; });
       const btn = document.querySelector(buttonSelector);
       if (btn) btn.style.display = visibleCount >= rows.length ? 'none' : '';
     }
-
     updateVisibility();
     const btn = document.querySelector(buttonSelector);
     if (btn) {
-      btn.addEventListener('click', () => {
-        visibleCount += step;
-        updateVisibility();
-      });
+      btn.addEventListener('click', () => { visibleCount += step; updateVisibility(); });
     }
   }
 
+  // Пагинация
   paginateTable('#passwordTable', '#loadMorePasswords');
   paginateTable('#cardTable', '#loadMoreCards');
+  paginateTable('#accountTable', '#loadMoreAccounts');
 
   // Поиск
-  const searchEntry = document.getElementById('searchEntry');
-  if (searchEntry) {
-    searchEntry.addEventListener('input', () => {
-      const filter = searchEntry.value.trim().toLowerCase();
-      document.querySelectorAll('#passwordTable tbody tr').forEach(row => {
-        const title = row.querySelector('.title-cell').textContent.toLowerCase();
-        row.style.display = title.includes(filter) ? '' : 'none';
+  function setupSearch(inputId, tableSelector) {
+    const searchInput = document.getElementById(inputId);
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        const filter = searchInput.value.trim().toLowerCase();
+        document.querySelectorAll(tableSelector + ' tbody tr').forEach(row => {
+          const title = row.querySelector('.title-cell').textContent.toLowerCase();
+          row.style.display = title.includes(filter) ? '' : 'none';
+        });
       });
-    });
+    }
   }
+  setupSearch('searchEntry', '#passwordTable');
+  setupSearch('searchCard', '#cardTable');
+  setupSearch('searchAccount', '#accountTable');
 
-  const searchCard = document.getElementById('searchCard');
-  if (searchCard) {
-    searchCard.addEventListener('input', () => {
-      const filter = searchCard.value.trim().toLowerCase();
-      document.querySelectorAll('#cardTable tbody tr').forEach(row => {
-        const title = row.querySelector('.title-cell').textContent.toLowerCase();
-        row.style.display = title.includes(filter) ? '' : 'none';
-      });
-    });
-  }
-
-  // Показать / скрыть значение
+  // Показать/скрыть значения
   document.querySelectorAll('.toggle-visibility').forEach(icon => {
     icon.addEventListener('click', () => {
       const span = document.getElementById(icon.dataset.target);

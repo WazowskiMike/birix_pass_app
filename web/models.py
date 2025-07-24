@@ -65,9 +65,6 @@ class BankCard(models.Model):
     expiry_date = models.CharField(max_length=5, blank=True, null=True)
     cvv = models.CharField(max_length=4, blank=True, null=True)
     description = models.TextField(blank=True)
-    is_payment = models.BooleanField(default=False)
-    routing_number = models.CharField(max_length=20, blank=True, null=True)
-    account_number = models.CharField(max_length=20, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -78,3 +75,26 @@ class BankCard(models.Model):
 
     def __str__(self):
         return f"{self.title} - ****{self.card_number[-4:]}"
+    
+class BankAccount(models.Model):
+    category = models.ForeignKey(
+        Category,
+        related_name='bank_accounts',
+        on_delete=models.CASCADE
+    )
+    title = models.CharField(max_length=100)
+    routing_number = models.CharField(max_length=9)
+    account_number = models.CharField(max_length=30)
+    account_holder_name = models.CharField(max_length=200)
+
+    description = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        if not re.fullmatch(r'^\d{9}$', self.routing_number):
+            raise ValidationError({'routing_number': 'Routing number must be exactly 9 digits.'})
+
+    def __str__(self):
+        return f"{self.title} ({self.get_account_type_display()}) - ****{self.account_number[-4:]}"
