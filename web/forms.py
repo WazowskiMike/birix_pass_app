@@ -32,11 +32,22 @@ class BankCardForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         self.fields['card_number'].required = False
         self.fields['full_name'].required = False
         self.fields['expiry_date'].required = False
         self.fields['cvv'].required = False
         self.fields['description'].required = False
+
+        # 👉 если форма создаётся впервые (нет instance.pk и нет переданных данных),
+        #    то устанавливаем значение по умолчанию
+        if not self.instance.pk and not self.data:
+            try:
+                default_category = self.fields['category'].queryset.get(name="Company Payment")
+                self.initial['category'] = default_category.pk
+            except Exception:
+                # если категории нет, просто не ставим ничего
+                pass
 
     def clean_card_number(self):
         number = self.cleaned_data.get('card_number')
@@ -67,6 +78,14 @@ class BankAccountForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['description'].required = False
+
+        # 👉 ставим категорию Company Payment по умолчанию
+        if not self.instance.pk and not self.data:
+            try:
+                default_category = self.fields['category'].queryset.get(name="Company Payment")
+                self.initial['category'] = default_category.pk
+            except:
+                pass
 
     def clean_routing_number(self):
         rn = self.cleaned_data.get('routing_number')

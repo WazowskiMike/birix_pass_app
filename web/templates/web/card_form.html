@@ -64,7 +64,11 @@
       <select name="category" id="id_category" class="form-select" required>
         {% for cat in form.fields.category.queryset %}
           <option value="{{ cat.id }}"
-            {% if form.instance.category and form.instance.category.id == cat.id %}selected{% endif %}>
+            {% if form.instance.category and form.instance.category.id == cat.id %}
+              selected
+            {% elif form.initial.category and form.initial.category == cat.id %}
+              selected
+            {% endif %}>
             {{ cat.name }}
           </option>
         {% endfor %}
